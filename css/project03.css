@@ -100,12 +100,16 @@ body {
   
   .card-back {
     background-color: #f4f4f4;
-    color: black;
     transform: rotateY(180deg);
+  }
+  
+  .card-back img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
   }
   
   .card.matched .card-back {
     background-color: #28a745;
-    color: white;
   }
   

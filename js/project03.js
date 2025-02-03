@@ -16,6 +16,12 @@ let timeElapsed = 0;
 let gridRows = 4;
 let gridCols = 4;
 
+// List of animal image filenames
+const animalImages = [
+  "cat.png", "dog.png", "elephant.png", "fox.png", "lion.png",
+  "monkey.png", "panda.png", "rabbit.png", "tiger.png", "zebra.png"
+];
+
 startGameBtn.addEventListener("click", () => {
   gridRows = parseInt(gridRowsInput.value);
   gridCols = parseInt(gridColsInput.value);
@@ -36,19 +42,19 @@ startGameBtn.addEventListener("click", () => {
 
 function initializeGame() {
   const totalCards = gridRows * gridCols;
-  const uniqueSymbols = totalCards / 2;
+  const uniquePairs = totalCards / 2;
 
-  // Ensure all cards have valid characters
-  const symbols = [];
-  for (let i = 0; i < uniqueSymbols; i++) {
-    symbols.push(String.fromCharCode(65 + (i % 26))); // Cycle A-Z for large grids
+  // Select images, cycling if needed
+  const selectedImages = [];
+  for (let i = 0; i < uniquePairs; i++) {
+    selectedImages.push(animalImages[i % animalImages.length]);
   }
 
-  const cardPairs = [...symbols, ...symbols];
+  const cardPairs = [...selectedImages, ...selectedImages];
   cards = shuffleArray(cardPairs);
   createGrid();
   resetGameInfo();
-  startTimer(); // Start the timer when a new game begins
+  startTimer(); // ✅ Fix: Ensure the timer starts when the game begins
 }
 
 function shuffleArray(array) {
@@ -63,14 +69,14 @@ function createGrid() {
   gameGrid.innerHTML = "";
   gameGrid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
 
-  cards.forEach((symbol) => {
+  cards.forEach((image) => {
     const card = document.createElement("div");
     card.className = "card";
-    card.dataset.symbol = symbol;
+    card.dataset.symbol = image; // Using image filename for matching
     card.innerHTML = `
       <div class="card-inner">
         <div class="card-front"></div>
-        <div class="card-back">${symbol}</div>
+        <div class="card-back"><img src="images/${image}" alt="Animal"></div>
       </div>
     `;
     card.addEventListener("click", handleCardClick);
@@ -102,10 +108,17 @@ function handleCardClick(e) {
 function checkForMatch() {
   const [card1, card2] = flippedCards;
 
+  // Compare image filenames instead of unique symbols
   if (card1.dataset.symbol === card2.dataset.symbol) {
     card1.classList.add("matched");
     card2.classList.add("matched");
     flippedCards = [];
+    
+    // Check if all cards are matched
+    if (document.querySelectorAll(".card.matched").length === cards.length) {
+      clearInterval(timerInterval);
+      alert(`Game completed in ${moves} moves and ${formatTime(timeElapsed)}!`);
+    }
   } else {
     setTimeout(() => {
       card1.classList.remove("flipped");
@@ -116,9 +129,8 @@ function checkForMatch() {
 }
 
 function startTimer() {
-  clearInterval(timerInterval);
   timeElapsed = 0;
-  timer.textContent = "00:00";
+  clearInterval(timerInterval); // ✅ Fix: Ensure previous timer is cleared
   timerInterval = setInterval(() => {
     timeElapsed++;
     timer.textContent = formatTime(timeElapsed);
@@ -132,13 +144,13 @@ function formatTime(seconds) {
 function resetGameInfo() {
   moves = 0;
   moveCounter.textContent = moves;
-  clearInterval(timerInterval);
+  clearInterval(timerInterval); // ✅ Fix: Clear timer on game reset
   timer.textContent = "00:00";
 }
 
 restartBtn.addEventListener("click", () => {
   gameContainer.classList.add("hidden");
   welcomeContainer.classList.remove("hidden");
-  clearInterval(timerInterval);
-  resetGameInfo(); // Reset moves when restarting the game
+  clearInterval(timerInterval); // ✅ Fix: Clear the timer on restart
+  resetGameInfo();
 });
